@@ -5,7 +5,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   This CloudFormation stack creates all the necessary pre-requisites for Amazon SageMaker Hyperpod with BYO VPC,
   these include a security group, a FSx Lustre Filesystem, S3 Bucket and IAM Role.
-  In addition you deploy several VPC endpoints for Amazon S3, SSM, STS, Logs, Monitoring, etc. 
+  In addition you deploy several VPC endpoints for AWS SSM, STS, Logs, Monitoring, etc. 
   The template creates an fsx lustre volume in the specified AZ with a default of
   1.2 TB storage which can be overridden by parameter. A role is also created which
   helps to execute HyperPod cluster operations.
@@ -22,10 +22,6 @@ Parameters:
 
   ParamPrivateSubnetid:
     Description: Bring your own Private Subnet 
-    Type: String
-
-  ParamPrivateRouteTable:
-    Description: Bring your own Private Subnet Route Table
     Type: String
 
   Capacity:
@@ -113,28 +109,7 @@ Resources:
       GroupId: !Ref SecurityGroup
       CidrIp: 0.0.0.0/0
 
-  # S3 endpoint
-  S3Endpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-            - Effect: Allow
-              Principal: '*'
-              Action:
-                - '*'
-              Resource:
-                - '*'
-      RouteTableIds:
-        - !Ref ParamPrivateRouteTable
-      ServiceName: !Join
-        - ''
-        - - com.amazonaws.
-          - !Ref AWS::Region
-          - .s3
-      VpcId: !Ref ParamVPCid
-  
+  ## VPC endpoints  
   SSMVPCVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
